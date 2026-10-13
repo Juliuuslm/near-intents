@@ -94,6 +94,36 @@ export async function getChainIcons(): Promise<ChainIcon[]> {
   }
 }
 
+export interface ChainLogo {
+  id: string;
+  name: string;
+  logoUrl: string;
+}
+
+// Supported Chains grid on /overview. Order follows the Airtable "Grid view" so editors control it there.
+export async function getChainLogos(): Promise<ChainLogo[]> {
+  try {
+    const chainTable = getChainIconsTable();
+    if (!chainTable) return [];
+    const records = await chainTable.select({ view: 'Grid view' }).all();
+    return records
+      .filter(r => r.get('Verify b&w') === true)
+      .map(r => {
+        const attachment = r.get('Logo B&W') as any;
+        return {
+          id: r.id,
+          name: r.get('Name') as string,
+          logoUrl: Array.isArray(attachment) && attachment.length > 0 ? attachment[0].url : '',
+        };
+      })
+      .filter(chain => chain.name && chain.logoUrl !== '');
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : JSON.stringify(error) || String(error);
+    console.error('Error fetching chain logos from Airtable:', msg);
+    return [];
+  }
+}
+
 export interface ChainAsset {
   id: string;
   name: string;

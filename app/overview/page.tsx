@@ -12,6 +12,10 @@ import OverviewCTA from '@/components/overview/OverviewCTA';
 import OverviewFooter from '@/components/overview/OverviewFooter';
 import { FooterBar } from '@/components/sections/FooterBar';
 import { buildMetadata } from '@/lib/seo';
+import { getChainLogos } from '@/lib/airtable';
+import { chains as fallbackChains, getChain, type Chain } from '@/lib/data/chains';
+
+export const revalidate = 3600;
 
 export const metadata = buildMetadata({
   title: 'Overview — NEAR Intents',
@@ -19,8 +23,15 @@ export const metadata = buildMetadata({
   path: '/overview',
 });
 
-export default function OverviewPage() {
+export default async function OverviewPage() {
   const caseStudies = getAllCaseStudies();
+  const chainLogos = await getChainLogos();
+  const chains: Chain[] = chainLogos.length > 0
+    ? chainLogos.map(({ name, logoUrl }) => {
+        const slug = name.toLowerCase().trim().replace(/\s+/g, '-');
+        return { slug, name, logo: logoUrl, color: getChain(slug)?.color ?? '#ffffff' };
+      })
+    : fallbackChains;
 
   return (
     <>
@@ -33,7 +44,7 @@ export default function OverviewPage() {
         <UserTypeSelector />
         <div className="hidden"><TickerBoard /></div>
         <div className="hidden"><AirtableChainBoard /></div>
-        <ChainGrid />
+        <ChainGrid chains={chains} />
         <OverviewCTA />
       </main>
       <div className="hidden"><OverviewFooter /></div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { chains } from '@/lib/data/chains';
+import type { Chain } from '@/lib/data/chains';
 
 const CHAIN_ASSETS: Record<string, Array<{ symbol: string; logo: string }>> = {
   ethereum:    [{ symbol: 'ETH',  logo: 'https://coin-images.coingecko.com/coins/images/279/small/ethereum.png' }, { symbol: 'USDC', logo: 'https://coin-images.coingecko.com/coins/images/6319/small/usdc.png' }, { symbol: 'USDT', logo: 'https://coin-images.coingecko.com/coins/images/325/small/Tether.png' }, { symbol: 'WBTC', logo: 'https://coin-images.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png' }],
@@ -42,13 +42,14 @@ function ChainImg({ logo, name, color }: { logo: string; name: string; color: st
     );
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={logo} alt={name} className="h-10 w-10 sm:h-12 sm:w-12 rounded-full shadow-sm object-contain"
-      onError={() => setErr(true)} />
+    <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full overflow-hidden bg-[#101214] p-2 ring-1 ring-white/10 shadow-sm">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={logo} alt={name} className="h-full w-full object-contain" onError={() => setErr(true)} />
+    </div>
   );
 }
 
-export default function ChainGrid() {
+export default function ChainGrid({ chains }: { chains: Chain[] }) {
   const [hoveredChain, setHoveredChain] = useState<string | null>(null);
   const [clickedChain, setClickedChain] = useState<string | null>(null);
   const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
